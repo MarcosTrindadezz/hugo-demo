@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Pulumi on Home</title>
+    <link>http://localhost:1313/tags/pulumi/</link>
+    <description>Recent content in Pulumi on Home</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>pt-br</language>
+    <lastBuildDate>Wed, 27 Sep 2023 21:29:31 -0300</lastBuildDate><atom:link href="http://localhost:1313/tags/pulumi/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Criando um Cluster EKS na AWS usando Pulumi </title>
+      <link>http://localhost:1313/portf%C3%B3lio/criando-um-cluster-eks-na-aws-usando-pulumi/</link>
+      <pubDate>Wed, 27 Sep 2023 21:29:31 -0300</pubDate>
+      
+      <guid>http://localhost:1313/portf%C3%B3lio/criando-um-cluster-eks-na-aws-usando-pulumi/</guid>
+      <description>&lt;h2 id=&#34;criando-um-cluster-eks-na-aws-usando-pulumi-e-com-deployament-de-aplicação&#34;&gt;&amp;ldquo;Criando um Cluster EKS na AWS usando Pulumi e com deployament de Aplicação&amp;rdquo;&lt;/h2&gt;
+&lt;blockquote&gt;
+&lt;h3 id=&#34;nesse-projeto-foram-usado-as-seguintes-tecnologias&#34;&gt;Nesse projeto foram usado as seguintes tecnologias&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;AWS&lt;/li&gt;
+&lt;li&gt;NLB&lt;/li&gt;
+&lt;li&gt;Pulumi&lt;/li&gt;
+&lt;li&gt;Vpc&lt;/li&gt;
+&lt;li&gt;Subnet&lt;/li&gt;
+&lt;li&gt;IGW (internet gateway)&lt;/li&gt;
+&lt;li&gt;Availabillity Zone (AZ)&lt;/li&gt;
+&lt;li&gt;AWS CLI (Conta na AWS com credenciais configuradas localmente)&lt;/li&gt;
+&lt;li&gt;Ec2&lt;/li&gt;
+&lt;li&gt;Cluster EKS&lt;/li&gt;
+&lt;li&gt;Docker&lt;/li&gt;
+&lt;li&gt;Image&lt;/li&gt;
+&lt;li&gt;Container&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;1-definição-da-vpc-e-cluster-eks&#34;&gt;&lt;em&gt;1. Definição da VPC e Cluster EKS&lt;/em&gt;&lt;/h3&gt;
+&lt;p&gt;A seguir o código para definir a Virtual Private Cloud (VPC) e o cluster EKS.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Importando os pacotes necessários do Pulumi e AWS
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;import &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; as pulumi from &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;@pulumi/pulumi&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;import &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; as aws from &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;@pulumi/aws&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;import &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; as eks from &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;@pulumi/eks&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;import &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; as awsx from &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;@pulumi/awsx&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;import &lt;span style=&#34;color:#f92672&#34;&gt;*&lt;/span&gt; as k8s from &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;@pulumi/kubernetes&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Criando a Virtual Private Cloud (VPC) usando awsx.ec2.Vpc
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; vpc &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; awsx.ec2.Vpc(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;vpc-pulumi&amp;#34;&lt;/span&gt;, {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    numberOfAvailabilityZones: &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#75715e&#34;&gt;// Definindo o número de zonas de disponibilidade
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    tags: { Name: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;pulumi-vpc&amp;#34;&lt;/span&gt; }, &lt;span style=&#34;color:#75715e&#34;&gt;// Adicionando tags para identificação
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;});
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Criando um cluster Amazon Elastic Kubernetes Service (EKS) usando eks.Cluster
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; cluster &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; eks.Cluster(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;cluster-pulumi&amp;#34;&lt;/span&gt;, {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    vpcId: vpc.vpcId, &lt;span style=&#34;color:#75715e&#34;&gt;// Especificando o ID da VPC
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    subnetIds: vpc.publicSubnetIds, &lt;span style=&#34;color:#75715e&#34;&gt;// Especificando os IDs das sub-redes públicas
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    tags: { Name: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;pulumi-cluster&amp;#34;&lt;/span&gt; }, &lt;span style=&#34;color:#75715e&#34;&gt;// Adicionando tags para identificação
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    desiredCapacity: &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#75715e&#34;&gt;// Definindo a capacidade desejada do cluster
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    minSize: &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#75715e&#34;&gt;// Definindo o tamanho mínimo do cluster
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    maxSize: &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;, &lt;span style=&#34;color:#75715e&#34;&gt;// Definindo o tamanho máximo do cluster
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    storageClasses: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;gp2&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#75715e&#34;&gt;// Definindo as classes de armazenamento
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    instanceType: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;t2.micro&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#75715e&#34;&gt;// Especificando o tipo de instância
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;});
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Exportando algumas informações úteis do cluster
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; clusterName &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; cluster.core.tags;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; clusterEndpoint &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; cluster.core.endpoint;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; kubeconfig &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; cluster.kubeconfig;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Definindo o nome e as labels do aplicativo
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; name &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;fcapp&amp;#34;&lt;/span&gt;;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; appLabels &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; { appClass: name };
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Criando um Deployment no Kubernetes para o aplicativo
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; deployment &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; k8s.apps.v1.Deployment(name, {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    metadata: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        labels: appLabels, &lt;span style=&#34;color:#75715e&#34;&gt;// Adicionando labels ao Deployment
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    },
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    spec: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        selector: { matchLabels: appLabels }, &lt;span style=&#34;color:#75715e&#34;&gt;// Especificando o seletor de labels
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;        replicas: &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;, &lt;span style=&#34;color:#75715e&#34;&gt;// Definindo o número de réplicas
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;        &lt;span style=&#34;color:#66d9ef&#34;&gt;template&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            metadata: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                labels: appLabels, 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            },
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            spec: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                containers: [
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                    {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                        name: name,
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                        image: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;brendofut/eks-brendo-eks&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#75715e&#34;&gt;// Especificando a imagem do contêiner
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;                        ports: [{ containerPort: &lt;span style=&#34;color:#ae81ff&#34;&gt;8080&lt;/span&gt; }], &lt;span style=&#34;color:#75715e&#34;&gt;// Expondo a porta 8080
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;                    },
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;                ],
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;            },
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        },
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    },
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;});
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Criando um Service no Kubernetes para expor o aplicativo
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; service &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; k8s.core.v1.Service(name, {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    metadata: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        labels: appLabels, &lt;span style=&#34;color:#75715e&#34;&gt;// Adicionando labels ao Service
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    },
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    spec: {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        type: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;LoadBalancer&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#75715e&#34;&gt;// Definindo o tipo de Service
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;        ports: [{ port: &lt;span style=&#34;color:#ae81ff&#34;&gt;80&lt;/span&gt;, targetPort: &lt;span style=&#34;color:#ae81ff&#34;&gt;8080&lt;/span&gt; }], &lt;span style=&#34;color:#75715e&#34;&gt;// Mapeando a porta 80 para a porta 8080
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;        selector: appLabels, &lt;span style=&#34;color:#75715e&#34;&gt;// Especificando o seletor de labels
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    },
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;});
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// Exportando o hostname do serviço para acessar o aplicativo
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;export&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;const&lt;/span&gt; serviceHostName &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; service.status.loadBalancer.ingress[&lt;span style=&#34;color:#ae81ff&#34;&gt;0&lt;/span&gt;].hostname;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h4 id=&#34;este-código-implanta-um-aplicativo-de-exemplo-com-um-contêiner-que-expõe-a-porta-8080-e-um-serviço-kubernetes-para-acessar-o-aplicativo&#34;&gt;Este código implanta um aplicativo de exemplo com um contêiner que expõe a porta 8080 e um serviço Kubernetes para acessar o aplicativo.&lt;/h4&gt;
+&lt;h3 id=&#34;2-construção-e-implantação&#34;&gt;&lt;em&gt;2. Construção e Implantação&lt;/em&gt;&lt;/h3&gt;
+&lt;h4 id=&#34;após-salvar-o-código-execute-os-seguintes-comandos-na-linha-de-comando&#34;&gt;&lt;em&gt;Após salvar o código, execute os seguintes comandos na linha de comando:&lt;/em&gt;&lt;/h4&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;pulumi up
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;3-trabalhando-com-dockerfile&#34;&gt;3. Trabalhando com Dockerfile&lt;/h3&gt;
+&lt;p&gt;Este Dockerfile é utilizado para construir uma imagem Docker baseada na imagem oficial do Node.js versão 14. Ele é usado para criar um ambiente de execução para uma aplicação Node.js.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

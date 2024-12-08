@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Terraform on Home</title>
+    <link>http://localhost:1313/tags/terraform/</link>
+    <description>Recent content in Terraform on Home</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>pt-br</language>
+    <lastBuildDate>Wed, 27 Sep 2023 21:29:31 -0300</lastBuildDate><atom:link href="http://localhost:1313/tags/terraform/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Criando uma arquitetura de duas camadas na AWS usando Terraform </title>
+      <link>http://localhost:1313/portf%C3%B3lio/arquitetura_duas_camadas/</link>
+      <pubDate>Wed, 27 Sep 2023 21:29:31 -0300</pubDate>
+      
+      <guid>http://localhost:1313/portf%C3%B3lio/arquitetura_duas_camadas/</guid>
+      <description>&lt;h2 id=&#34;implantação-uma-arquitetura-de-duas-camadas-na-aws-usando-terraform&#34;&gt;&amp;ldquo;Implantação uma arquitetura de duas camadas na AWS usando Terraform&amp;rdquo;&lt;/h2&gt;
+&lt;p&gt;Confira o código completo aqui no &lt;a href=&#34;https://github.com/BrendoTrindade/aws-duas-camadas.git&#34;&gt;github&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;h3 id=&#34;nesse-projeto-foram-usado-as-seguintes-tecnologias&#34;&gt;Nesse projeto foram usado as seguintes tecnologias&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;AWS&lt;/li&gt;
+&lt;li&gt;NLB&lt;/li&gt;
+&lt;li&gt;Rds&lt;/li&gt;
+&lt;li&gt;Mysql&lt;/li&gt;
+&lt;li&gt;Vpc&lt;/li&gt;
+&lt;li&gt;Subnet&lt;/li&gt;
+&lt;li&gt;IGW (internet gateway)&lt;/li&gt;
+&lt;li&gt;Availabillity Zone (AZ)&lt;/li&gt;
+&lt;li&gt;Ec2&lt;/li&gt;
+&lt;li&gt;Terraform&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;estrutura-básica-dos-diretórios&#34;&gt;Estrutura básica dos diretórios&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;├── terraform &lt;span style=&#34;color:#75715e&#34;&gt;# Arquivos do terraform pra deploy da ec2, target group, vpc, subnet, router table, IGW, ALB&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;│   ├── elb.tf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;│   ├── vpc_sub_ec2.tf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;│   ├── variables.tf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;├── terraform.tfstate
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;└── terraform.tfstate.backup
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;o provisionamento de infraestrutura na Amazon Web Services (AWS) usando Terraform, uma ferramenta de infraestrutura como código (IaC).Vamos analisar a estrutura de código Terraform e os diferentes arquivos envolvidos no processo.&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Implantação Azul/Verde na AWS com Terraform: Grupos-alvo ponderados </title>
+      <link>http://localhost:1313/portf%C3%B3lio/greenazul/</link>
+      <pubDate>Wed, 27 Sep 2023 21:29:31 -0300</pubDate>
+      
+      <guid>http://localhost:1313/portf%C3%B3lio/greenazul/</guid>
+      <description>&lt;h2 id=&#34;implantação-azulverde-na-aws-demonstração-de-infraestrutura-com-terraform&#34;&gt;&amp;ldquo;Implantação Azul/Verde na AWS: Demonstração de Infraestrutura com Terraform&amp;rdquo;&lt;/h2&gt;
+&lt;p&gt;Confira o código completo aqui no &lt;a href=&#34;https://github.com/BrendoTrindade/aws-verde-azul.git&#34;&gt;github&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;h3 id=&#34;nesse-projeto-foram-usado-as-seguintes-tecnologias&#34;&gt;Nesse projeto foram usado as seguintes tecnologias&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;AWS&lt;/li&gt;
+&lt;li&gt;ALB&lt;/li&gt;
+&lt;li&gt;target Group&lt;/li&gt;
+&lt;li&gt;Vpc&lt;/li&gt;
+&lt;li&gt;Subnet&lt;/li&gt;
+&lt;li&gt;Router Table&lt;/li&gt;
+&lt;li&gt;IGW (internet gateway)&lt;/li&gt;
+&lt;li&gt;Availabillity Zone (AZ)&lt;/li&gt;
+&lt;li&gt;Terraform&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&#34;estrutura-básica-dos-diretórios&#34;&gt;Estrutura básica dos diretórios&lt;/h3&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;├── terraform &lt;span style=&#34;color:#75715e&#34;&gt;# Arquivos do terraform pra deploy da ec2, target group, vpc, subnet, router table, IGW, ALB&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;│   ├── alb_target.tf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;│   ├── ec2_azul_verde.tf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;│   ├── igw.tf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;│   ├── vpc_subnet.tf
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;├── terraform.tfstate
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;└── terraform.tfstate.backup
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;terraform&#34;&gt;Terraform&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c++&#34; data-lang=&#34;c++&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;provider &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;aws&amp;#34;&lt;/span&gt; {
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  region &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;us-east-1&amp;#34;&lt;/span&gt; 
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;}
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Neste bloco, estamos configurando a região da AWS onde nossa infraestrutura será criada.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

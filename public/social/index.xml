@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Social on Brendo Blog</title>
+    <link>http://localhost:1313/social/</link>
+    <description>Recent content in Social on Brendo Blog</description>
+    <image>
+      <title>Brendo Blog</title>
+      <url>http://localhost:1313/brendo.png</url>
+      <link>http://localhost:1313/brendo.png</link>
+    </image>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>pt-br</language><atom:link href="http://localhost:1313/social/index.xml" rel="self" type="application/rss+xml" />
+  </channel>
+</rss>

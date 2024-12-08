@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="noindex, nofollow">
+<title>Criando um Cluster EKS na AWS usando Pulumi  | Home</title>
+<meta name="keywords" content="Pulumi, portifolio, aws">
+<meta name="description" content="&ldquo;Criando um Cluster EKS na AWS usando Pulumi e com deployament de Aplicação&rdquo;
+
+Nesse projeto foram usado as seguintes tecnologias
+
+AWS
+NLB
+Pulumi
+Vpc
+Subnet
+IGW (internet gateway)
+Availabillity Zone (AZ)
+AWS CLI (Conta na AWS com credenciais configuradas localmente)
+Ec2
+Cluster EKS
+Docker
+Image
+Container
+
+
+
+1. Definição da VPC e Cluster EKS
+A seguir o código para definir a Virtual Private Cloud (VPC) e o cluster EKS.
+
+// Importando os pacotes necessários do Pulumi e AWS
+import * as pulumi from &#34;@pulumi/pulumi&#34;;
+import * as aws from &#34;@pulumi/aws&#34;;
+import * as eks from &#34;@pulumi/eks&#34;;
+import * as awsx from &#34;@pulumi/awsx&#34;;
+import * as k8s from &#34;@pulumi/kubernetes&#34;;
+
+// Criando a Virtual Private Cloud (VPC) usando awsx.ec2.Vpc
+const vpc = new awsx.ec2.Vpc(&#34;vpc-pulumi&#34;, {
+    numberOfAvailabilityZones: 2, // Definindo o número de zonas de disponibilidade
+    tags: { Name: &#34;pulumi-vpc&#34; }, // Adicionando tags para identificação
+});
+
+// Criando um cluster Amazon Elastic Kubernetes Service (EKS) usando eks.Cluster
+const cluster = new eks.Cluster(&#34;cluster-pulumi&#34;, {
+    vpcId: vpc.vpcId, // Especificando o ID da VPC
+    subnetIds: vpc.publicSubnetIds, // Especificando os IDs das sub-redes públicas
+    tags: { Name: &#34;pulumi-cluster&#34; }, // Adicionando tags para identificação
+    desiredCapacity: 2, // Definindo a capacidade desejada do cluster
+    minSize: 2, // Definindo o tamanho mínimo do cluster
+    maxSize: 2, // Definindo o tamanho máximo do cluster
+    storageClasses: &#34;gp2&#34;, // Definindo as classes de armazenamento
+    instanceType: &#34;t2.micro&#34;, // Especificando o tipo de instância
+});
+
+// Exportando algumas informações úteis do cluster
+export const clusterName = cluster.core.tags;
+export const clusterEndpoint = cluster.core.endpoint;
+export const kubeconfig = cluster.kubeconfig;
+
+// Definindo o nome e as labels do aplicativo
+const name = &#34;fcapp&#34;;
+const appLabels = { appClass: name };
+
+// Criando um Deployment no Kubernetes para o aplicativo
+const deployment = new k8s.apps.v1.Deployment(name, {
+    metadata: {
+        labels: appLabels, // Adicionando labels ao Deployment
+    },
+    spec: {
+        selector: { matchLabels: appLabels }, // Especificando o seletor de labels
+        replicas: 1, // Definindo o número de réplicas
+        template: {
+            metadata: {
+                labels: appLabels, 
+            },
+            spec: {
+                containers: [
+                    {
+                        name: name,
+                        image: &#34;brendofut/eks-brendo-eks&#34;, // Especificando a imagem do contêiner
+                        ports: [{ containerPort: 8080 }], // Expondo a porta 8080
+                    },
+                ],
+            },
+        },
+    },
+});
+
+// Criando um Service no Kubernetes para expor o aplicativo
+const service = new k8s.core.v1.Service(name, {
+    metadata: {
+        labels: appLabels, // Adicionando labels ao Service
+    },
+    spec: {
+        type: &#34;LoadBalancer&#34;, // Definindo o tipo de Service
+        ports: [{ port: 80, targetPort: 8080 }], // Mapeando a porta 80 para a porta 8080
+        selector: appLabels, // Especificando o seletor de labels
+    },
+});
+
+// Exportando o hostname do serviço para acessar o aplicativo
+export const serviceHostName = service.status.loadBalancer.ingress[0].hostname;
+Este código implanta um aplicativo de exemplo com um contêiner que expõe a porta 8080 e um serviço Kubernetes para acessar o aplicativo.
+2. Construção e Implantação
+Após salvar o código, execute os seguintes comandos na linha de comando:
+
+pulumi up
+3. Trabalhando com Dockerfile
+Este Dockerfile é utilizado para construir uma imagem Docker baseada na imagem oficial do Node.js versão 14. Ele é usado para criar um ambiente de execução para uma aplicação Node.js.">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/portf%C3%B3lio/criando-um-cluster-eks-na-aws-usando-pulumi/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.5cfc680b1eeaeef9efbced92d46c2a9e876b72ee14fba85846afc4cff9e6e6f8.css" integrity="sha256-XPxoCx7q7vnvvO2S1Gwqnodrcu4U&#43;6hYRq/Ez/nm5vg=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/portf%C3%B3lio/criando-um-cluster-eks-na-aws-usando-pulumi/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+</head>
+
+<body class=" dark" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Home (Alt + H)">Home</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/portfolio/" title="Portfólio">
+                    <span>Portfólio</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/sobre-mim/" title="Sobre Mim">
+                    <span>Sobre Mim</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://rxresu.me/brendo.trindade/resumo" title="Resumo">
+                    <span>Resumo</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="https://linktr.ee/brendo_trindade" title="Linktree">
+                    <span>Linktree</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a></div>
+    <h1 class="post-title">
+      Criando um Cluster EKS na AWS usando Pulumi 
+    </h1>
+    <div class="post-meta">&lt;span title=&#39;2023-09-27 21:29:31 -0300 -03&#39;&gt;September 27, 2023&lt;/span&gt;&amp;nbsp;·&amp;nbsp;5 min
+
+</div>
+  </header> 
+<figure class="entry-cover"><img loading="lazy" src="http://localhost:1313/banner/Criando%20um%20Cluster%20EKS%20na%20AWS%20usando%20Pulumi.png" alt="">
+        <p><text></p>
+</figure>
+  <div class="post-content"><h2 id="criando-um-cluster-eks-na-aws-usando-pulumi-e-com-deployament-de-aplicação">&ldquo;Criando um Cluster EKS na AWS usando Pulumi e com deployament de Aplicação&rdquo;<a hidden class="anchor" aria-hidden="true" href="#criando-um-cluster-eks-na-aws-usando-pulumi-e-com-deployament-de-aplicação">#</a></h2>
+<blockquote>
+<h3 id="nesse-projeto-foram-usado-as-seguintes-tecnologias">Nesse projeto foram usado as seguintes tecnologias<a hidden class="anchor" aria-hidden="true" href="#nesse-projeto-foram-usado-as-seguintes-tecnologias">#</a></h3>
+<ul>
+<li>AWS</li>
+<li>NLB</li>
+<li>Pulumi</li>
+<li>Vpc</li>
+<li>Subnet</li>
+<li>IGW (internet gateway)</li>
+<li>Availabillity Zone (AZ)</li>
+<li>AWS CLI (Conta na AWS com credenciais configuradas localmente)</li>
+<li>Ec2</li>
+<li>Cluster EKS</li>
+<li>Docker</li>
+<li>Image</li>
+<li>Container</li>
+</ul>
+</blockquote>
+<hr>
+<h3 id="1-definição-da-vpc-e-cluster-eks"><em>1. Definição da VPC e Cluster EKS</em><a hidden class="anchor" aria-hidden="true" href="#1-definição-da-vpc-e-cluster-eks">#</a></h3>
+<p>A seguir o código para definir a Virtual Private Cloud (VPC) e o cluster EKS.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Importando os pacotes necessários do Pulumi e AWS
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>import <span style="color:#f92672">*</span> as pulumi from <span style="color:#e6db74">&#34;@pulumi/pulumi&#34;</span>;
+</span></span><span style="display:flex;"><span>import <span style="color:#f92672">*</span> as aws from <span style="color:#e6db74">&#34;@pulumi/aws&#34;</span>;
+</span></span><span style="display:flex;"><span>import <span style="color:#f92672">*</span> as eks from <span style="color:#e6db74">&#34;@pulumi/eks&#34;</span>;
+</span></span><span style="display:flex;"><span>import <span style="color:#f92672">*</span> as awsx from <span style="color:#e6db74">&#34;@pulumi/awsx&#34;</span>;
+</span></span><span style="display:flex;"><span>import <span style="color:#f92672">*</span> as k8s from <span style="color:#e6db74">&#34;@pulumi/kubernetes&#34;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Criando a Virtual Private Cloud (VPC) usando awsx.ec2.Vpc
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> vpc <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> awsx.ec2.Vpc(<span style="color:#e6db74">&#34;vpc-pulumi&#34;</span>, {
+</span></span><span style="display:flex;"><span>    numberOfAvailabilityZones: <span style="color:#ae81ff">2</span>, <span style="color:#75715e">// Definindo o número de zonas de disponibilidade
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    tags: { Name: <span style="color:#e6db74">&#34;pulumi-vpc&#34;</span> }, <span style="color:#75715e">// Adicionando tags para identificação
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Criando um cluster Amazon Elastic Kubernetes Service (EKS) usando eks.Cluster
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> cluster <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> eks.Cluster(<span style="color:#e6db74">&#34;cluster-pulumi&#34;</span>, {
+</span></span><span style="display:flex;"><span>    vpcId: vpc.vpcId, <span style="color:#75715e">// Especificando o ID da VPC
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    subnetIds: vpc.publicSubnetIds, <span style="color:#75715e">// Especificando os IDs das sub-redes públicas
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    tags: { Name: <span style="color:#e6db74">&#34;pulumi-cluster&#34;</span> }, <span style="color:#75715e">// Adicionando tags para identificação
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    desiredCapacity: <span style="color:#ae81ff">2</span>, <span style="color:#75715e">// Definindo a capacidade desejada do cluster
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    minSize: <span style="color:#ae81ff">2</span>, <span style="color:#75715e">// Definindo o tamanho mínimo do cluster
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    maxSize: <span style="color:#ae81ff">2</span>, <span style="color:#75715e">// Definindo o tamanho máximo do cluster
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    storageClasses: <span style="color:#e6db74">&#34;gp2&#34;</span>, <span style="color:#75715e">// Definindo as classes de armazenamento
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    instanceType: <span style="color:#e6db74">&#34;t2.micro&#34;</span>, <span style="color:#75715e">// Especificando o tipo de instância
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Exportando algumas informações úteis do cluster
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> clusterName <span style="color:#f92672">=</span> cluster.core.tags;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> clusterEndpoint <span style="color:#f92672">=</span> cluster.core.endpoint;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> kubeconfig <span style="color:#f92672">=</span> cluster.kubeconfig;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Definindo o nome e as labels do aplicativo
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;fcapp&#34;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> appLabels <span style="color:#f92672">=</span> { appClass: name };
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Criando um Deployment no Kubernetes para o aplicativo
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> deployment <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> k8s.apps.v1.Deployment(name, {
+</span></span><span style="display:flex;"><span>    metadata: {
+</span></span><span style="display:flex;"><span>        labels: appLabels, <span style="color:#75715e">// Adicionando labels ao Deployment
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    },
+</span></span><span style="display:flex;"><span>    spec: {
+</span></span><span style="display:flex;"><span>        selector: { matchLabels: appLabels }, <span style="color:#75715e">// Especificando o seletor de labels
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        replicas: <span style="color:#ae81ff">1</span>, <span style="color:#75715e">// Definindo o número de réplicas
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#66d9ef">template</span><span style="color:#f92672">:</span> {
+</span></span><span style="display:flex;"><span>            metadata: {
+</span></span><span style="display:flex;"><span>                labels: appLabels, 
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            spec: {
+</span></span><span style="display:flex;"><span>                containers: [
+</span></span><span style="display:flex;"><span>                    {
+</span></span><span style="display:flex;"><span>                        name: name,
+</span></span><span style="display:flex;"><span>                        image: <span style="color:#e6db74">&#34;brendofut/eks-brendo-eks&#34;</span>, <span style="color:#75715e">// Especificando a imagem do contêiner
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                        ports: [{ containerPort: <span style="color:#ae81ff">8080</span> }], <span style="color:#75715e">// Expondo a porta 8080
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                    },
+</span></span><span style="display:flex;"><span>                ],
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>    },
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Criando um Service no Kubernetes para expor o aplicativo
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> service <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> k8s.core.v1.Service(name, {
+</span></span><span style="display:flex;"><span>    metadata: {
+</span></span><span style="display:flex;"><span>        labels: appLabels, <span style="color:#75715e">// Adicionando labels ao Service
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    },
+</span></span><span style="display:flex;"><span>    spec: {
+</span></span><span style="display:flex;"><span>        type: <span style="color:#e6db74">&#34;LoadBalancer&#34;</span>, <span style="color:#75715e">// Definindo o tipo de Service
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        ports: [{ port: <span style="color:#ae81ff">80</span>, targetPort: <span style="color:#ae81ff">8080</span> }], <span style="color:#75715e">// Mapeando a porta 80 para a porta 8080
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        selector: appLabels, <span style="color:#75715e">// Especificando o seletor de labels
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    },
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Exportando o hostname do serviço para acessar o aplicativo
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">export</span> <span style="color:#66d9ef">const</span> serviceHostName <span style="color:#f92672">=</span> service.status.loadBalancer.ingress[<span style="color:#ae81ff">0</span>].hostname;
+</span></span></code></pre></div><h4 id="este-código-implanta-um-aplicativo-de-exemplo-com-um-contêiner-que-expõe-a-porta-8080-e-um-serviço-kubernetes-para-acessar-o-aplicativo">Este código implanta um aplicativo de exemplo com um contêiner que expõe a porta 8080 e um serviço Kubernetes para acessar o aplicativo.<a hidden class="anchor" aria-hidden="true" href="#este-código-implanta-um-aplicativo-de-exemplo-com-um-contêiner-que-expõe-a-porta-8080-e-um-serviço-kubernetes-para-acessar-o-aplicativo">#</a></h4>
+<h3 id="2-construção-e-implantação"><em>2. Construção e Implantação</em><a hidden class="anchor" aria-hidden="true" href="#2-construção-e-implantação">#</a></h3>
+<h4 id="após-salvar-o-código-execute-os-seguintes-comandos-na-linha-de-comando"><em>Após salvar o código, execute os seguintes comandos na linha de comando:</em><a hidden class="anchor" aria-hidden="true" href="#após-salvar-o-código-execute-os-seguintes-comandos-na-linha-de-comando">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pulumi up
+</span></span></code></pre></div><h3 id="3-trabalhando-com-dockerfile">3. Trabalhando com Dockerfile<a hidden class="anchor" aria-hidden="true" href="#3-trabalhando-com-dockerfile">#</a></h3>
+<p>Este Dockerfile é utilizado para construir uma imagem Docker baseada na imagem oficial do Node.js versão 14. Ele é usado para criar um ambiente de execução para uma aplicação Node.js.</p>
+<h2 id="dockerfile">Dockerfile:<a hidden class="anchor" aria-hidden="true" href="#dockerfile">#</a></h2>
+<ol>
+<li>
+<p><strong>FROM node:14</strong>:</p>
+<ul>
+<li>Esta instrução define a imagem base como a imagem oficial do Node.js na versão 14. Essa imagem será utilizada como base para construir a imagem personalizada.</li>
+</ul>
+</li>
+<li>
+<p><strong>WORKDIR /usr/src/app</strong>:</p>
+<ul>
+<li>Define o diretório de trabalho dentro do contêiner como <code>/usr/src/app</code>, onde os arquivos da aplicação serão copiados e onde os comandos subsequentes serão executados.</li>
+</ul>
+</li>
+<li>
+<p><em><em>COPY package</em>.json ./</em>*:</p>
+<ul>
+<li>Copia os arquivos <code>package.json</code> e <code>package-lock.json</code> (se existirem) do diretório local para o diretório de trabalho no contêiner. Isso permite que as dependências sejam instaladas separadamente, evitando a reinstalação sempre que houver uma alteração nos arquivos do projeto.</li>
+</ul>
+</li>
+<li>
+<p><strong>RUN npm install</strong>:</p>
+<ul>
+<li>Executa o comando <code>npm install</code> para instalar as dependências da aplicação. Isso é feito após copiar os arquivos <code>package.json</code> para garantir que as dependências sejam instaladas apenas quando necessário e que o cache do Docker seja aproveitado sempre que possível.</li>
+</ul>
+</li>
+<li>
+<p><strong>COPY . .</strong>:</p>
+<ul>
+<li>Copia todos os arquivos e diretórios do diretório local para o diretório de trabalho no contêiner. Isso inclui todos os arquivos necessários para a execução da aplicação, como arquivos de código-fonte, arquivos de configuração, etc.</li>
+</ul>
+</li>
+<li>
+<p><strong>EXPOSE 8080</strong>:</p>
+<ul>
+<li>Expõe a porta 8080 do contêiner, permitindo que a aplicação seja acessível a partir de outras partes da rede, se necessário.</li>
+</ul>
+</li>
+<li>
+<p><strong>CMD [&ldquo;node&rdquo;, &ldquo;index.js&rdquo;]</strong>:</p>
+<ul>
+<li>Define o comando padrão a ser executado quando o contêiner for iniciado. Neste caso, o comando <code>node index.js</code> é usado para iniciar a aplicação Node.js.</li>
+</ul>
+</li>
+</ol>
+<h2 id="utilização">Utilização:<a hidden class="anchor" aria-hidden="true" href="#utilização">#</a></h2>
+<h3 id="image-oficial-nodejs-14">Image oficial Node.js 14<a hidden class="anchor" aria-hidden="true" href="#image-oficial-nodejs-14">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>FROM node:<span style="color:#ae81ff">14</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>WORKDIR <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>src<span style="color:#f92672">/</span>app
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>COPY package<span style="color:#f92672">*</span>.json .<span style="color:#f92672">/</span>
+</span></span></code></pre></div><h3 id="dependencies">Dependencies<a hidden class="anchor" aria-hidden="true" href="#dependencies">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>RUN npm install
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>COPY . .
+</span></span></code></pre></div><h3 id="port-8080">Port 8080<a hidden class="anchor" aria-hidden="true" href="#port-8080">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>EXPOSE <span style="color:#ae81ff">8080</span>
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>CMD [<span style="color:#e6db74">&#34;node&#34;</span>, <span style="color:#e6db74">&#34;index.js&#34;</span>]
+</span></span></code></pre></div><h3 id="comandos-utilizados">Comandos utilizados:<a hidden class="anchor" aria-hidden="true" href="#comandos-utilizados">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>docker build <span style="color:#f92672">-</span>t eks<span style="color:#f92672">-</span>brendo<span style="color:#f92672">-</span>eks .  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>docker run <span style="color:#f92672">-</span>p <span style="color:#ae81ff">8080</span><span style="color:#f92672">:</span><span style="color:#ae81ff">8080</span> eks<span style="color:#f92672">-</span>brendo<span style="color:#f92672">-</span>eks
+</span></span></code></pre></div><h3 id="criando-arquivo-index">Criando arquivo Index<a hidden class="anchor" aria-hidden="true" href="#criando-arquivo-index">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c++" data-lang="c++"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> http <span style="color:#f92672">=</span> require(<span style="color:#960050;background-color:#1e0010">&#39;</span>http<span style="color:#960050;background-color:#1e0010">&#39;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> hostname <span style="color:#f92672">=</span> <span style="color:#960050;background-color:#1e0010">&#39;</span>localhost<span style="color:#960050;background-color:#1e0010">&#39;</span>;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> port <span style="color:#f92672">=</span> <span style="color:#ae81ff">8080</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">const</span> server <span style="color:#f92672">=</span> http.createServer((req, res) <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>  res.statusCode <span style="color:#f92672">=</span> <span style="color:#ae81ff">200</span>;
+</span></span><span style="display:flex;"><span>  res.setHeader(<span style="color:#960050;background-color:#1e0010">&#39;</span>Content<span style="color:#f92672">-</span>Type<span style="color:#960050;background-color:#1e0010">&#39;</span>, <span style="color:#960050;background-color:#1e0010">&#39;</span>text<span style="color:#f92672">/</span>plain<span style="color:#960050;background-color:#1e0010">&#39;</span>);
+</span></span><span style="display:flex;"><span>  res.end(<span style="color:#960050;background-color:#1e0010">&#39;</span>Hello Brendo, estou usando cluster EKS<span style="color:#960050;background-color:#1e0010">\</span>n<span style="color:#960050;background-color:#1e0010">&#39;</span>);
+</span></span><span style="display:flex;"><span>});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>server.listen(port, hostname, () <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>  console.log(<span style="color:#960050;background-color:#1e0010">`</span>Server running at http:<span style="color:#75715e">//${hostname}:${port}/`);
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>});
+</span></span></code></pre></div><p>Em resumo, exploramos como criar um cluster EKS na AWS usando o Pulumi. Começamos definindo a infraestrutura como código, configurando o cluster EKS e construindo uma imagem Docker para uma aplicação Node.js. Em seguida, implantamos essa aplicação no cluster EKS e validamos seu funcionamento. Ao seguir este guia, os desenvolvedores podem aprender a integrar efetivamente o Pulumi com o EKS para criar e gerenciar clusters Kubernetes na AWS.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/pulumi/">Pulumi</a></li>
+      <li><a href="http://localhost:1313/tags/portifolio/">Portifolio</a></li>
+      <li><a href="http://localhost:1313/tags/aws/">Aws</a></li>
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/portf%C3%B3lio/arquitetura_duas_camadas/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Criando uma arquitetura de duas camadas na AWS usando Terraform </span>
+  </a>
+</nav>
+
+
+<div class="share-buttons">
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Criando um Cluster EKS na AWS usando Pulumi  on twitter"
+        href="https://twitter.com/intent/tweet/?text=Criando%20um%20Cluster%20EKS%20na%20AWS%20usando%20Pulumi%20&amp;url=http%3a%2f%2flocalhost%3a1313%2fportf%25C3%25B3lio%2fcriando-um-cluster-eks-na-aws-usando-pulumi%2f&amp;hashtags=Pulumi%2cportifolio%2caws">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-253.927,424.544c135.939,0 210.268,-112.643 210.268,-210.268c0,-3.218 0,-6.437 -0.153,-9.502c14.406,-10.421 26.973,-23.448 36.935,-38.314c-13.18,5.824 -27.433,9.809 -42.452,11.648c15.326,-9.196 26.973,-23.602 32.49,-40.92c-14.252,8.429 -30.038,14.56 -46.896,17.931c-13.487,-14.406 -32.644,-23.295 -53.946,-23.295c-40.767,0 -73.87,33.104 -73.87,73.87c0,5.824 0.613,11.494 1.992,16.858c-61.456,-3.065 -115.862,-32.49 -152.337,-77.241c-6.284,10.881 -9.962,23.601 -9.962,37.088c0,25.594 13.027,48.276 32.95,61.456c-12.107,-0.307 -23.448,-3.678 -33.41,-9.196l0,0.92c0,35.862 25.441,65.594 59.311,72.49c-6.13,1.686 -12.72,2.606 -19.464,2.606c-4.751,0 -9.348,-0.46 -13.946,-1.38c9.349,29.426 36.628,50.728 68.965,51.341c-25.287,19.771 -57.164,31.571 -91.8,31.571c-5.977,0 -11.801,-0.306 -17.625,-1.073c32.337,21.15 71.264,33.41 112.95,33.41Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Criando um Cluster EKS na AWS usando Pulumi  on linkedin"
+        href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fportf%25C3%25B3lio%2fcriando-um-cluster-eks-na-aws-usando-pulumi%2f&amp;title=Criando%20um%20Cluster%20EKS%20na%20AWS%20usando%20Pulumi%20&amp;summary=Criando%20um%20Cluster%20EKS%20na%20AWS%20usando%20Pulumi%20&amp;source=http%3a%2f%2flocalhost%3a1313%2fportf%25C3%25B3lio%2fcriando-um-cluster-eks-na-aws-usando-pulumi%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Criando um Cluster EKS na AWS usando Pulumi  on reddit"
+        href="https://reddit.com/submit?url=http%3a%2f%2flocalhost%3a1313%2fportf%25C3%25B3lio%2fcriando-um-cluster-eks-na-aws-usando-pulumi%2f&title=Criando%20um%20Cluster%20EKS%20na%20AWS%20usando%20Pulumi%20">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Criando um Cluster EKS na AWS usando Pulumi  on facebook"
+        href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2flocalhost%3a1313%2fportf%25C3%25B3lio%2fcriando-um-cluster-eks-na-aws-usando-pulumi%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Criando um Cluster EKS na AWS usando Pulumi  on whatsapp"
+        href="https://api.whatsapp.com/send?text=Criando%20um%20Cluster%20EKS%20na%20AWS%20usando%20Pulumi%20%20-%20http%3a%2f%2flocalhost%3a1313%2fportf%25C3%25B3lio%2fcriando-um-cluster-eks-na-aws-usando-pulumi%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Criando um Cluster EKS na AWS usando Pulumi  on telegram"
+        href="https://telegram.me/share/url?text=Criando%20um%20Cluster%20EKS%20na%20AWS%20usando%20Pulumi%20&amp;url=http%3a%2f%2flocalhost%3a1313%2fportf%25C3%25B3lio%2fcriando-um-cluster-eks-na-aws-usando-pulumi%2f">
+        <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Criando um Cluster EKS na AWS usando Pulumi  on ycombinator"
+        href="https://news.ycombinator.com/submitlink?t=Criando%20um%20Cluster%20EKS%20na%20AWS%20usando%20Pulumi%20&u=http%3a%2f%2flocalhost%3a1313%2fportf%25C3%25B3lio%2fcriando-um-cluster-eks-na-aws-usando-pulumi%2f">
+        <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+            xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+            <path
+                d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+        </svg>
+    </a>
+</div>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="http://localhost:1313/">Home</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

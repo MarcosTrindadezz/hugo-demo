@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Sobre on Home</title>
+    <link>http://localhost:1313/tags/sobre/</link>
+    <description>Recent content in Sobre on Home</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>pt-br</language>
+    <lastBuildDate>Fri, 07 Oct 2022 16:29:31 -0300</lastBuildDate><atom:link href="http://localhost:1313/tags/sobre/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Um pouco sobre mim</title>
+      <link>http://localhost:1313/posts/sobre/</link>
+      <pubDate>Fri, 07 Oct 2022 16:29:31 -0300</pubDate>
+      
+      <guid>http://localhost:1313/posts/sobre/</guid>
+      <description>&lt;p&gt;Olá, sou Brendo Trindade, um entusiasta da tecnologia desde uma idade precoce. Minha jornada começou aos 11 anos, quando ganhei meu primeiro computador e fiquei fascinado por desvendar seu funcionamento e a configuração do sistema.&lt;/p&gt;
+&lt;p&gt;Ao longo do tempo, realizei inúmeras descobertas por conta própria, aprendendo a montar e fazer a manutenção de computadores. Busquei aprofundar meus conhecimentos por meio de cursos na Microlins e na Ceadep.&lt;/p&gt;
+&lt;p&gt;Minha busca por compreender o funcionamento dos sistemas me levou a tomar a decisão de ingressar na faculdade. Em 2018, comecei o curso de Análise e Desenvolvimento de Sistemas, concluindo-o em 2021. No entanto, devido a circunstâncias adversas, precisei pausar meus projetos na área, uma vez que estávamos saindo de uma pandemia de larga escala.&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>
