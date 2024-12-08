@@ -9,10 +9,10 @@ buildExpired = false
 
 [params]
 env = "production"
-title = "Brendo Blog"
-description = "Blog pessoal de Brendo Trindade"
+title = "Marcos"
+description = "Meu site pessoal"
 keywords = ["Blog", "Portfolio", "DevOps"]
-author = "Brendo Trindade"
+author = "Marcos Trindade"
 DateFormat = "January 2, 2006"
 defaultTheme = "auto"
 ShowReadingTime = true
@@ -26,9 +26,9 @@ UseHugoToc = true
 
 [params.profileMode]
 enabled = true
-title = "Brendo Trindade"
+title = "Marcos Trindade"
 subtitle = "DevOps Engineer"
-imageUrl = "brendo.png"
+imageUrl = "marcos.png"
 imageTitle = "my image"
 
 [[params.socialIcons]]
@@ -37,7 +37,7 @@ url = "https://github.com/MarcosTrindadezz"
 
 [[params.socialIcons]]
 name = "linkedin"
-url = "https://www.linkedin.com/in/brendo-trindade-a71596251/"
+url = "https://www.linkedin.com/in/marcosgab"
 
 [[menu.main]]
 identifier = "portfolio"
