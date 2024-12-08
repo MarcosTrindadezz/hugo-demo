@@ -40,20 +40,20 @@ name = "linkedin"
 url = "https://www.linkedin.com/in/marcosgab"
 
 [[menu.main]]
-identifier = "projects"
-name = "Portfolio"
+identifier = "portfolio"
+name = "projects"
 url = "/Portfólio/"
 weight = 10
 
 [[menu.main]]
 identifier = "sobre"
-name = "About me"
+name = "about me"
 url = "/posts/sobre/"
 weight = 30
 
 [[menu.main]]
 identifier = "curriculo"
-name = "Resume"
+name = "resume"
 url = "https://drive.google.com/file/d/1hHZ4A5n1myURiLE1C9FiapLHq6d111tB/view?usp=sharing"
 weight = 40
 
