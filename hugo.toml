@@ -1,5 +1,5 @@
 baseURL = "https://marcostrindade.netlify.app/"
-title = "Brendo Blog"
+title = "Marcos"
 theme = "PaperMod"
 
 enableRobotsTXT = true
@@ -46,12 +46,6 @@ url = "/Portfólio/"
 weight = 10
 
 [[menu.main]]
-identifier = "tags"
-name = "Tags"
-url = "/tags/"
-weight = 20
-
-[[menu.main]]
 identifier = "sobre"
 name = "Sobre Mim"
 url = "/posts/sobre/"
@@ -60,14 +54,9 @@ weight = 30
 [[menu.main]]
 identifier = "curriculo"
 name = "Currículo"
-url = "/curriculo/"
+url = "https://www.canva.com/design/DAF0OUIMgrs/fKgsbqJT_0ZncmMbAVDi3A/edit?utm_content=DAF0OUIMgrs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
 weight = 40
 
-[[menu.main]]
-identifier = "linktree"
-name = "Linktree"
-url = "/linktree/"
-weight = 50
 
 [markup.goldmark.renderer]
 unsafe = true
