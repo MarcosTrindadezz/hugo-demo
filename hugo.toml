@@ -10,7 +10,7 @@ buildExpired = false
 [params]
 env = "production"
 title = "Marcos"
-description = "Meu site pessoal"
+description = "Meu Blog"
 keywords = ["Blog", "Portfolio", "DevOps"]
 author = "Marcos Trindade"
 DateFormat = "January 2, 2006"
@@ -28,7 +28,7 @@ UseHugoToc = true
 enabled = true
 title = "Marcos Trindade"
 subtitle = "DevOps Engineer"
-imageUrl = "brendo.png"
+imageUrl = "marcos.png"
 imageTitle = "my image"
 
 [[params.socialIcons]]
