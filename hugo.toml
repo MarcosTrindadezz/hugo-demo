@@ -1,5 +1,5 @@
 baseURL = "https://marcostrindade.netlify.app/"
-title = "Marcos Trindade"
+title = "Brendo Blog"
 theme = "PaperMod"
 
 enableRobotsTXT = true
@@ -9,10 +9,10 @@ buildExpired = false
 
 [params]
 env = "production"
-title = "Marcos Trindade"
-description = "Blog pessoal e portfólio de DevOps"
-keywords = ["DevOps", "Cloud", "Infraestrutura", "Tecnologia"]
-author = "Marcos Trindade"
+title = "Brendo Blog"
+description = "Blog pessoal de Brendo Trindade"
+keywords = ["Blog", "Portfolio", "DevOps"]
+author = "Brendo Trindade"
 DateFormat = "January 2, 2006"
 defaultTheme = "auto"
 ShowReadingTime = true
@@ -26,7 +26,7 @@ UseHugoToc = true
 
 [params.profileMode]
 enabled = true
-title = "Marcos Trindade"
+title = "Brendo Trindade"
 subtitle = "DevOps Engineer"
 imageUrl = "brendo.png"
 imageTitle = "my image"
@@ -37,31 +37,37 @@ url = "https://github.com/MarcosTrindadezz"
 
 [[params.socialIcons]]
 name = "linkedin"
-url = "https://www.linkedin.com/in/marcos-trindade"
-
-[[menu.main]]
-identifier = "home"
-name = "Home"
-url = "/"
-weight = 10
-
-[[menu.main]]
-identifier = "posts"
-name = "Posts"
-url = "/posts/"
-weight = 20
+url = "https://www.linkedin.com/in/brendo-trindade-a71596251/"
 
 [[menu.main]]
 identifier = "portfolio"
-name = "Portfólio"
+name = "Portfolio"
 url = "/Portfólio/"
-weight = 30
+weight = 10
+
+[[menu.main]]
+identifier = "tags"
+name = "Tags"
+url = "/tags/"
+weight = 20
 
 [[menu.main]]
 identifier = "sobre"
-name = "Sobre"
+name = "Sobre Mim"
 url = "/posts/sobre/"
+weight = 30
+
+[[menu.main]]
+identifier = "curriculo"
+name = "Currículo"
+url = "/curriculo/"
 weight = 40
+
+[[menu.main]]
+identifier = "linktree"
+name = "Linktree"
+url = "/linktree/"
+weight = 50
 
 [markup.goldmark.renderer]
 unsafe = true
