@@ -45,6 +45,13 @@ name = "Portfolio"
 url = "/Portfólio/"
 weight = 10
 
+
+[[menu.main]]
+identifier = "sobre"
+name = "Sobre Mim"
+url = "/posts/_index/"
+weight = 32
+
 [[menu.main]]
 identifier = "sobre"
 name = "Sobre Mim"
