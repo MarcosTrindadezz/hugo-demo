@@ -28,7 +28,7 @@ UseHugoToc = true
 enabled = true
 title = "Marcos Trindade"
 subtitle = "DevOps Engineer"
-imageUrl = "marcos.png"
+imageUrl = "brendo.png"
 imageTitle = "my image"
 
 [[params.socialIcons]]
